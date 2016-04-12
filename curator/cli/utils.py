@@ -7,6 +7,7 @@ import json
 from .utils import *
 
 import elasticsearch
+from requests_aws4auth import AWS4Auth
 from ..api import *
 
 logger = logging.getLogger(__name__)
@@ -111,6 +112,9 @@ def get_client(**kwargs):
     kwargs['certificate'] = False if not 'certificate' in kwargs else kwargs['certificate']
     kwargs['client_cert'] = False if not 'client_cert' in kwargs else kwargs['client_cert']
     kwargs['client_key'] = False if not 'client_key' in kwargs else kwargs['client_key']
+    kwargs['access_key'] = False if not 'access_key' in kwargs else kwargs['access_key']
+    kwargs['secret_access_key'] = False if not 'secret_access_key' in kwargs else kwargs['secret_access_key']
+    kwargs['region'] = False if not 'region' in kwargs else kwargs['region']
     logger.debug("kwargs = {0}".format(kwargs))
     master_only = kwargs.pop('master_only')
     if kwargs['use_ssl']:
@@ -129,6 +133,22 @@ def get_client(**kwargs):
                     kwargs['ca_certs'] = certifi.where()
                 except ImportError:
                     logger.warn('Unable to verify SSL certificate.')
+    if kwargs['access_key'] or kwargs['secret_access_key'] or kwargs['region']:
+        if not kwargs['access_key']:
+            logger.error('Access Key not specified.')
+            sys.exit(1)
+        if not kwargs['secret_access_key']:
+            logger.error('Secret Access Key not specified.')
+            sys.exit(1)
+        if not kwargs['region']:
+            logger.error('Region not specified')
+            sys.exit(1)
+        kwargs['hosts'] = [{'host': kwargs['host'], 'port': 443}]
+        kwargs['port'] = 443
+        kwargs['http_auth'] = AWS4Auth(kwargs['access_key'], kwargs['secret_access_key'], kwargs['region'], 'es')
+        kwargs['use_ssl'] = True
+        kwargs['verify_certs'] = True
+        kwargs['connection_class'] = elasticsearch.RequestsHttpConnection
     try:
         client = elasticsearch.Elasticsearch(**kwargs)
         # Verify the version is acceptable.

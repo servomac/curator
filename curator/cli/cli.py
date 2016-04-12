@@ -39,6 +39,9 @@ DEFAULT_ARGS = {
 @click.option('--client-key', help='Path to file containing SSL key for client auth. (OPTIONAL)', type=str, default=None)
 @click.option('--ssl-no-validate', help='Do not validate SSL certificate', is_flag=True)
 @click.option('--http_auth', help='Use Basic Authentication ex: user:pass', default=DEFAULT_ARGS['http_auth'])
+@click.option('--access-key', help='Access key of the IAM user to connect to the AWS Elasticsearch Service host. (OPTIONAL)', default=None)
+@click.option('--secret-access-key', help='Secret Access key of the IAM user, (OPTIONAL)', default=None)
+@click.option('--region', help='AWS region of the Elasticsearch Service host. (OPTIONAL)', default=None)
 @click.option('--timeout', help='Connection timeout in seconds.', default=DEFAULT_ARGS['timeout'], type=int)
 @click.option('--master-only', is_flag=True, help='Only operate on elected master node.')
 @click.option('--dry-run', is_flag=True, help='Do not perform any changes.', default=DEFAULT_ARGS['dry_run'])
@@ -49,7 +52,7 @@ DEFAULT_ARGS = {
 @click.option('--quiet', help='Suppress command-line output.', is_flag=True)
 @click.version_option(version=__version__)
 @click.pass_context
-def cli(ctx, host, url_prefix, port, use_ssl, certificate, client_cert, client_key, ssl_no_validate, http_auth, timeout, master_only, dry_run, debug, loglevel, logfile, logformat, quiet):
+def cli(ctx, host, url_prefix, port, use_ssl, certificate, client_cert, client_key, ssl_no_validate, http_auth, access_key, secret_access_key, region, timeout, master_only, dry_run, debug, loglevel, logfile, logformat, quiet):
     """
     Curator for Elasticsearch indices.
 
